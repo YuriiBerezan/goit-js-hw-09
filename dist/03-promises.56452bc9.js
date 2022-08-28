@@ -141,15 +141,15 @@ function onFormSubmit(e) {
     createPromise(position, delay).then(function (_ref) {
       var position = _ref.position,
           delay = _ref.delay;
-      setTimeout(function () {
-        _notiflix.Notify.success("\u2705 Fulfilled promise ".concat(position, " in ").concat(delay, "ms"));
-      }, delay);
+
+      _notiflix.Notify.success("\u2705 Fulfilled promise ".concat(position, " in ").concat(delay, "ms"));
     }).catch(function (_ref2) {
       var position = _ref2.position,
           delay = _ref2.delay;
-      setTimeout(function () {
-        _notiflix.Notify.failure("\u274C Rejected promise ".concat(position, " in ").concat(delay, "ms"));
-      }, delay);
+
+      // setTimeout(() => {
+      _notiflix.Notify.failure("\u274C Rejected promise ".concat(position, " in ").concat(delay, "ms")); // }, delay) 
+
     });
     delay += step;
   }
@@ -162,11 +162,13 @@ function createPromise(position, delay) {
     delay: delay
   };
   return new Promise(function (resolve, reject) {
-    if (shouldResolve) {
-      resolve(promiseValue);
-    }
+    setTimeout(function () {
+      if (shouldResolve) {
+        resolve(promiseValue);
+      }
 
-    reject(promiseValue);
+      reject(promiseValue);
+    });
   });
 }
 },{"notiflix":"../node_modules/notiflix/dist/notiflix-aio-3.2.5.min.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {

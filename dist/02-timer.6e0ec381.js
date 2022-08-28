@@ -2841,125 +2841,94 @@ var _flatpickr = _interopRequireDefault(require("flatpickr"));
 
 require("flatpickr/dist/flatpickr.min.css");
 
-var _notiflix = require("notiflix");
+var _notiflix = _interopRequireDefault(require("notiflix"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var refs = {
+  input: document.querySelector('input#datetime-picker'),
+  startBtn: document.querySelector('button[data-start]'),
+  dataDays: document.querySelector('span[data-days]'),
+  dataHours: document.querySelector('span[data-hours]'),
+  dataMinutes: document.querySelector('span[data-minutes]'),
+  dataSeconds: document.querySelector('span[data-seconds]')
+};
+var timerId = null;
+var todayTime = null;
+var selectTime = null;
+refs.startBtn.addEventListener('click', handleStartBtnClick);
+refs.startBtn.setAttribute("disabled", "disabled");
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+function handleStartBtnClick(evt) {
+  timerId = setInterval(function () {
+    todayTime = Date.now();
+    var currentTime = selectTime - todayTime;
+    var time = convertMs(currentTime);
+    console.log(time);
+    updateTime(time);
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+    if (currentTime < 1000) {
+      clearInterval(timerId);
+    }
+  }, 1000);
+}
 
-var inputEl = document.querySelector('#datetime-picker');
-var btnEl = document.querySelector('button[data-start]');
-var timerDiv = document.querySelector('.timer');
-var daysEl = document.querySelector('span[data-days]');
-var hoursEl = document.querySelector('span[data-hours]');
-var minEl = document.querySelector('span[data-minutes]');
-var secEl = document.querySelector('span[data-seconds]');
-btnEl.classList.add('disabled');
-var userDate = null;
-
-function convertMs(ms) {
+function convertMs(time) {
   // Number of milliseconds per unit of time
   var second = 1000;
   var minute = second * 60;
   var hour = minute * 60;
   var day = hour * 24; // Remaining days
 
-  var days = pad(Math.floor(ms / day)); // Remaining hours
+  var days = addLeadingZero(Math.floor(time / day)); // Remaining hours
 
-  var hours = pad(Math.floor(ms % day / hour)); // Remaining minutes
+  var hours = addLeadingZero(Math.floor(time % day / hour)); // Remaining minutes
 
-  var minutes = pad(Math.floor(ms % day % hour / minute)); // Remaining seconds
+  var minutes = addLeadingZero(Math.floor(time % day % hour / minute)); // Remaining seconds
 
-  var seconds = pad(Math.floor(ms % day % hour % minute / second));
+  var seconds = addLeadingZero(Math.floor(time % day % hour % minute / second));
   return {
     days: days,
     hours: hours,
     minutes: minutes,
     seconds: seconds
   };
-} //   console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
-//   console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
-//   console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
-
-
-function pad(value) {
-  return String(value).padStart(2, '0');
 }
 
-var options = {
+var dataFlatpickr = (0, _flatpickr.default)('input#datetime-picker', {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose: function onClose(selectedDates) {
-    console.log(selectedDates[0]);
+    selectTime = selectedDates[0];
 
-    if (selectedDates[0] < Date.now()) {
-      _notiflix.Notify.failure('Please choose a date in the future');
-
-      userDate = new Date();
+    if (selectTime > Date.now()) {
+      refs.startBtn.removeAttribute("disabled");
     } else {
-      btnEl.disabled = false;
-      btnEl.classList.remove('disabled');
-      userDate = selectedDates[0];
+      _notiflix.default.Notify.failure('Please choose a date in the future');
+
+      refs.startBtn.setAttribute('disabled', 'disabled');
     }
   }
-};
-
-var Timer = /*#__PURE__*/function () {
-  function Timer() {
-    _classCallCheck(this, Timer);
-
-    this.isActive = false;
-    this.timerId = null;
-    btnEl.disabled = true;
-  }
-
-  _createClass(Timer, [{
-    key: "timerStart",
-    value: function timerStart() {
-      var _this = this;
-
-      if (this.isActive) {
-        return;
-      }
-
-      this.isActive = true;
-      this.timerId = setInterval(function () {
-        var currentTime = Date.now();
-        var deltaTime = userDate - currentTime;
-        var components = convertMs(deltaTime);
-        secEl.textContent = components.seconds;
-        minEl.textContent = components.minutes;
-        hoursEl.textContent = components.hours;
-        daysEl.textContent = components.days;
-
-        if (deltaTime <= 0) {
-          _this.stop();
-
-          timerDiv.innerHTML = "Time is over!";
-        }
-      }, 1000);
-    }
-  }, {
-    key: "timerStop",
-    value: function timerStop() {
-      clearInterval(this.timerId);
-    }
-  }]);
-
-  return Timer;
-}();
-
-var timer = new Timer();
-(0, _flatpickr.default)(inputEl, options);
-btnEl.addEventListener('click', function () {
-  return timer.timerStart();
 });
+
+function updateTime(_ref) {
+  var days = _ref.days,
+      hours = _ref.hours,
+      minutes = _ref.minutes,
+      seconds = _ref.seconds;
+  refs.dataDays.textContent = days;
+  refs.dataHours.textContent = hours;
+  refs.dataMinutes.textContent = minutes;
+  refs.dataSeconds.textContent = seconds;
+}
+
+;
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
+}
 },{"flatpickr":"../node_modules/flatpickr/dist/esm/index.js","flatpickr/dist/flatpickr.min.css":"../node_modules/flatpickr/dist/flatpickr.min.css","notiflix":"../node_modules/notiflix/dist/notiflix-aio-3.2.5.min.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
