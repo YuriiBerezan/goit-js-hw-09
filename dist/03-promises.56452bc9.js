@@ -128,49 +128,66 @@ var global = arguments[3];
 
 var _notiflix = require("notiflix");
 
-var formEl = document.querySelector('.form');
-formEl.addEventListener('submit', onFormSubmit);
+var formBlock = document.querySelector(".form");
+formBlock.addEventListener("submit", function (event) {
+  event.preventDefault();
+  var _event$currentTarget = event.currentTarget,
+      delay = _event$currentTarget.delay,
+      step = _event$currentTarget.step,
+      amount = _event$currentTarget.amount;
+  var currentDelay = Number(delay.value);
+  var stepNumber = Number(step.value);
+  var amountP = Number(amount.value);
 
-function onFormSubmit(e) {
-  e.preventDefault();
-  var delay = Number(e.currentTarget.delay.value);
-  var step = Number(e.currentTarget.step.value);
-  var amount = Number(e.currentTarget.amount.value);
-
-  for (var position = 1; position <= amount; position += 1) {
-    createPromise(position, delay).then(function (_ref) {
-      var position = _ref.position,
-          delay = _ref.delay;
-
-      _notiflix.Notify.success("\u2705 Fulfilled promise ".concat(position, " in ").concat(delay, "ms"));
-    }).catch(function (_ref2) {
-      var position = _ref2.position,
-          delay = _ref2.delay;
-
-      // setTimeout(() => {
-      _notiflix.Notify.failure("\u274C Rejected promise ".concat(position, " in ").concat(delay, "ms")); // }, delay) 
-
-    });
-    delay += step;
+  for (var position = 1; position <= amountP; position++) {
+    createPromise(position, currentDelay);
+    console.log("delayPromise", currentDelay, "position", position);
+    currentDelay += stepNumber;
   }
-}
+
+  ;
+});
 
 function createPromise(position, delay) {
-  var shouldResolve = Math.random() > 0.3;
-  var promiseValue = {
-    position: position,
-    delay: delay
-  };
-  return new Promise(function (resolve, reject) {
+  var shouldResolve = Math.random() > 0.3; // const values = { position, delay };
+
+  var promise = new Promise(function (resolve, reject) {
     setTimeout(function () {
       if (shouldResolve) {
-        resolve(promiseValue);
+        // Fulfill
+        resolve({
+          position: position,
+          delay: delay
+        });
+      } else {
+        // Reject
+        reject({
+          position: position,
+          delay: delay
+        });
       }
 
-      reject(promiseValue);
-    });
+      ;
+    }, delay);
+  });
+  promise.then(function (_ref) {
+    var position = _ref.position,
+        delay = _ref.delay;
+
+    _notiflix.Notify.success("Fulfilled promise ".concat(position, " in ").concat(delay, "ms"));
+
+    console.log("\u2705 Fulfilled promise ".concat(position, " in ").concat(delay, "ms"));
+  }).catch(function (_ref2) {
+    var position = _ref2.position,
+        delay = _ref2.delay;
+
+    _notiflix.Notify.failure("Rejected promise ".concat(position, " in ").concat(delay, "ms"));
+
+    console.log("\u274C Rejected promise ".concat(position, " in ").concat(delay, "ms"));
   });
 }
+
+;
 },{"notiflix":"../node_modules/notiflix/dist/notiflix-aio-3.2.5.min.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
